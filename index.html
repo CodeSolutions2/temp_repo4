@@ -15,9 +15,12 @@
 
 
 async function run_selection() {
-
-  var [xs, ys] = await fetch_and_parse_csv_from_url();
-
+	
+	const ys_selected_ColNum = [4];
+	const headerORnot = "no_header";
+	var [xs, ys] = await fetch_and_parse_csv_from_url();
+	console.log('xs: ', xs);
+	console.log('ys: ', ys);
   
 
 }
@@ -36,19 +39,13 @@ async function algo1() {
 // -----------------------------------------------
 // SUBFUNCTIONS
 // -----------------------------------------------
-async function fetch_and_parse_csv_from_url() {
+async function fetch_and_parse_csv_from_url(ys_selected_ColNum, headerORnot) {
 	
 	// Fetch data 
 	const data_str = await load_csv_JS();
 	console.log('data_str: ', data_str);
-	
-	const ys_selected_ColNum = [4];
-	const headerORnot = "no_header";
-	var [xs, ys] = await parse_text_to_array(data_str, ys_selected_ColNum, headerORnot);
-	console.log('xs: ', xs);
-	console.log('ys: ', ys);
 
-  return [xs, ys];
+	return await parse_text_to_array(data_str, ys_selected_ColNum, headerORnot);
 }
 
 // -----------------------------------------------

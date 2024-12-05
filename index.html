@@ -18,7 +18,7 @@ async function run_selection() {
 	
 	const ys_selected_ColNum = [4];
 	const headerORnot = "no_header";
-	var [xs, ys] = await fetch_and_parse_csv_from_url();
+	var [xs, ys] = await fetch_and_parse_csv_from_url(ys_selected_ColNum, headerORnot);
 	console.log('xs: ', xs);
 	console.log('ys: ', ys);
   

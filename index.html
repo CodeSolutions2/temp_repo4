@@ -42,7 +42,7 @@ async function fetch_and_parse_csv_from_url() {
 	const data_str = await load_csv_JS();
 	console.log('data_str: ', data_str);
 	
-	const ys_selected_ColNum = [1];
+	const ys_selected_ColNum = [4];
 	const headerORnot = "no_header";
 	var [xs, ys] = await parse_text_to_array(data_str, ys_selected_ColNum, headerORnot);
 	console.log('xs: ', xs);

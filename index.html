@@ -13,6 +13,7 @@
 	
 <script>
 
+// -----------------------------------------------
 
 async function run_selection() {
 	
@@ -25,13 +26,48 @@ async function run_selection() {
 
 }
 
-async function algo1() {
+// -----------------------------------------------
 
+async function algo1_mainfunction(X, K, iterations, rtol) {
 
-  
 }
 
+// -----------------------------------------------
+	
+async function algo1_subfunction(X, K, centroids, rtol) {
 
+	const [r, c] = await shape(X);
+
+	// there are K centroids per feature column, so prev_centroid is size [K, c]
+	const dims = [K, c];
+	var prev_centroid = await zeros(dims);
+
+	var d = await isclose(prev_centroid, centroids, rtol);
+	
+	while (d == false) {
+
+		// Calculate y, using sum of squared distance to centroids
+
+
+
+		// Calculate cost
+		var J = await sum(dist) * (1/r);
+
+		// Reset prev_centroid
+		prev_centroid = centroids;
+
+		// Recalculate the centroids
+
+
+		
+		// Re-evaluate d
+		d = await isclose(prev_centroid, centroids, rtol);
+	}
+
+	return [y, J, centroids];
+}
+
+// -----------------------------------------------
 
   
   
@@ -229,7 +265,64 @@ async function zeros(dims) {
 	
 // -----------------------------------------------
 	
+async function recur_func(arr) {
+	if (arr != undefined) {
+		return [arr[0], arr.length];
+	} else {
+		return arr;
+	}
+}
 
+async function shape(arr) {
+	var out = await recur_func(arr);
+	var shape_out = [out[1]];
+	var c = 0; // typically work with 4D arrays or less
+	
+	while (out != undefined && c < 4) {
+		out = await recur_func(out[0]);
+		
+		if (out != undefined) {
+			shape_out.push(out[1]);
+		}
+			c = c + 1;
+		}
+
+		if (shape_out.length > 1) {
+			shape_out = shape_out.slice(0, shape_out.length-1);
+		}
+
+	return shape_out;
+}
+
+// -----------------------------------------------
+
+async function isclose(arr0, arr1, rtol) {
+
+	// Determine if two arrays are close to each other, with a summed difference of rtol
+	var sum = 0;
+	for (let i=0; i<K; i++) {
+		for (let j=0; j<c; j++) {
+			var arr_difference = arr0[i][j] - arr1[i][j];
+			sum = sum + arr_difference;
+		}
+	}
+	
+	if (sum < rtol) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+// -----------------------------------------------
+
+async function sum(arr) {
+	return arr.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+}
+
+// -----------------------------------------------
+
+	
 </script>
 </body>
 </html>

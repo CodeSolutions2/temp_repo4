@@ -76,7 +76,7 @@ async function call_fetch_method(url) {
 			}
 			
 		} catch (error) {
-			cnsole.log("error: ", error);
+			console.log("error: ", error);
 		}
 		if (response != undefined) {
 			break;
@@ -185,6 +185,49 @@ async function parse_text_to_array(text_str, ys_selected_ColNum, headerORnot) {
 	return [xs, ys];
 }
 
+// -----------------------------------------------
+	
+async function zeros(dims) {
+
+	// dims: [desired_0th_dim, desired_1st_dim, desired_2nd_dim]
+
+	var out = [];
+	
+	if (dims.length == 1) {
+		var desired_0th_dim = dims.at(0);
+		
+		out = Array.from({length: desired_0th_dim}, (val, ind) => { return 0; }); 
+
+	} else if (dims.length == 2) {
+		var desired_0th_dim = dims.at(0);
+		var desired_1st_dim = dims.at(1);
+		
+		for (var i=0; i<desired_0th_dim; i++) {
+			var arr = Array.from({length: desired_1st_dim}, (val, ind) => { return 0; }); 
+			out.push(arr);
+		}
+
+	} else if (dims.length == 3) {
+		var desired_0th_dim = dims.at(0);
+		var desired_1st_dim = dims.at(1);
+		var desired_2nd_dim = dims.at(2);
+		
+		for (var i=0; i<desired_0th_dim; i++) {
+			temp = [];
+			for (var j=0; j<desired_1st_dim; j++) {
+				var arr = Array.from({length: desired_2nd_dim}, (val, ind) => { return 0; }); 
+				temp.push(arr);
+			}
+			out.push(temp);
+		}
+		
+	} else {
+		console.log('Enter an array of length 1, 2, or 3. (ie: [desired_0th_dim, desired_1st_dim, desired_2nd_dim])')
+	}
+	
+	return out;
+}
+	
 // -----------------------------------------------
 	
 

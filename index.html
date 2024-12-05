@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>  
+
+
+<input id="url" type="text" value="" placeholder="url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+	
+<button id="run_selection" onclick="run_selection()">run_selection</button>
+
+
+<script>
+
+
+async function run_selection() {
+
+  var [xs, ys] = await fetch_and_parse_csv_from_url();
+
+  
+
+}
+
+async function algo1() {
+
+
+  
+}
+
+
+
+  
+  
+
+// -----------------------------------------------
+// SUBFUNCTIONS
+// -----------------------------------------------
+async function fetch_and_parse_csv_from_url() {
+	
+	// Fetch data 
+	const data_str = await load_csv_JS();
+	console.log('data_str: ', data_str);
+	
+	const ys_selected_ColNum = [1];
+	const headerORnot = "no_header";
+	var [xs, ys] = await parse_text_to_array(data_str, ys_selected_ColNum, headerORnot);
+	console.log('xs: ', xs);
+	console.log('ys: ', ys);
+
+  return [xs, ys];
+}
+
+// -----------------------------------------------
+
+async function load_csv_JS() {
+	
+	const url = document.getElementById("url").value;
+
+	// Use JavaScript to fetch csv_data from Bucket
+	return await call_fetch_method(url);
+}
+
+// -----------------------------------------------
+
+async function call_fetch_method(url) {
+	
+	const CORS_method_list = ["jQuery_csv_GET", "fetch_csv_GET"];
+	
+	var response = undefined;
+		
+	for (var i=0; i<CORS_method_list.length; i++) {
+		try {
+			if (i == 0) {
+				response = await fetch_csv_GET(url);
+			} else {
+				response = await jQuery_csv_GET(url);
+			}
+			
+		} catch (error) {
+			cnsole.log("error: ", error);
+		}
+		if (response != undefined) {
+			break;
+		}
+	}
+	return response;
+}
+
+// -----------------------------------------------
+
+async function fetch_csv_GET(url) {
+	
+	var headers = {
+		"Content-Type": "application/json",
+		"Referer": url,
+		"Origin": "https://codesolutions2.github.io",
+		"Connection": "keep-alive",
+		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+		"Access-Control-Allow-Origin": "*",
+	};
+	
+	var options = { 
+		method : "GET",
+		mode: 'cors',
+		headers: new Headers(headers),
+		cache: "no-cache",
+		crossorigin: 'anonymous',
+		redirect: "follow"
+	};
+	
+	return await fetch(url, options)
+		.then(res => res.text())
+		.then(str_data => { return str_data; })
+		.catch(error => { console.error("error: ", error); });
+
+}
+
+// -----------------------------------------------
+
+async function jQuery_csv_GET(url) {
+	
+	var headers = {
+		"Content-Type": "application/json",
+		"Referer": url,
+		"Origin": "https://codesolutions2.github.io",
+		"Connection": "keep-alive",
+		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+		"Access-Control-Allow-Origin": "*",
+	};
+	
+	var settings = {
+		// url: url,
+		type : "GET",
+		async: true,
+		crossDomain: true,
+		beforeSend: function(xhr) {xhr.withCredentials = true;},
+		// headers: new Headers(headers),
+		xhrFields: {responseType: 'text'},
+		dataType: 'text',
+		success: function(response) { console.log('Success'); },
+		error: function(xhr, status, error) { console.error("error: ", error); }
+	};
+	
+	return $.ajax(url, [,settings]).done(function(response) { return response; });
+
+}
+
+// -----------------------------------------------
+
+async function parse_text_to_array(text_str, ys_selected_ColNum, headerORnot) {
+	
+	var row_arr = text_str.split('\n');
+
+	if (headerORnot == "no_header") {
+		row_arr = row_arr.slice(1,row_arr.length-1);
+	}
+	console.log('row_arr: ', row_arr);
+	
+	var xs = [];
+	var ys = [];
+	for (let i=0; i<row_arr.length; i++) {
+		var col_arr = row_arr[i].split(',');
+		console.log('col_arr: ', col_arr);
+		
+		var c = 0
+		var xs_cols = [];
+		var ys_cols = [];
+		for (let j=0; j<col_arr.length; j++) {
+			
+			// Convert strings to number if needed
+			var datatype = Number(col_arr[j]) == Number(col_arr[j]) ? Number(col_arr[j]) : String(col_arr[j]);
+			// console.log('datatype: ', datatype);
+			// console.log('data type [number, string]: ', typeof datatype);
+			
+			if (j == ys_selected_ColNum[c]) {
+				ys_cols.push(datatype);
+				c = c + 1;
+			} else {
+				xs_cols.push(datatype);
+			}
+		}
+		// pack xs and ys
+		xs.push(xs_cols);
+		ys.push(ys_cols);
+	}
+	return [xs, ys];
+}
+
+// -----------------------------------------------
+	
+
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>  
+
+
+<input id="url" type="text" value="" placeholder="url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+	
+<button id="run_selection" onclick="run_selection()">run_selection</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	
+<script>
+
+// -----------------------------------------------
+
+async function run_selection() {
+	
+	const ys_selected_ColNum = [4];
+	const headerORnot = "no_header";
+	var [xs, ys] = await fetch_and_parse_csv_from_url(ys_selected_ColNum, headerORnot);
+	console.log('xs: ', xs);
+	console.log('ys: ', ys);
+  
+
+}
+
+// -----------------------------------------------
+
+
+
+
+
+
+
+
+
+  
+  
+
+// -----------------------------------------------
+// SUBFUNCTIONS
+// -----------------------------------------------
+async function fetch_and_parse_csv_from_url(ys_selected_ColNum, headerORnot) {
+	
+	// Fetch data 
+	const data_str = await load_csv_JS();
+	console.log('data_str: ', data_str);
+
+	return await parse_text_to_array(data_str, ys_selected_ColNum, headerORnot);
+}
+
+// -----------------------------------------------
+
+async function load_csv_JS() {
+	
+	const url = document.getElementById("url").value;
+
+	// Use JavaScript to fetch csv_data from Bucket
+	return await call_fetch_method(url);
+}
+
+// -----------------------------------------------
+
+async function call_fetch_method(url) {
+	
+	const CORS_method_list = ["jQuery_csv_GET", "fetch_csv_GET"];
+	
+	var response = undefined;
+		
+	for (var i=0; i<CORS_method_list.length; i++) {
+		try {
+			if (i == 0) {
+				response = await fetch_csv_GET(url);
+			} else {
+				response = await jQuery_csv_GET(url);
+			}
+			
+		} catch (error) {
+			console.log("error: ", error);
+		}
+		if (response != undefined) {
+			break;
+		}
+	}
+	return response;
+}
+
+// -----------------------------------------------
+
+async function fetch_csv_GET(url) {
+	
+	var headers = {
+		"Content-Type": "application/json",
+		"Referer": url,
+		"Origin": "https://codesolutions2.github.io",
+		"Connection": "keep-alive",
+		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+		"Access-Control-Allow-Origin": "*",
+	};
+	
+	var options = { 
+		method : "GET",
+		mode: 'cors',
+		headers: new Headers(headers),
+		cache: "no-cache",
+		crossorigin: 'anonymous',
+		redirect: "follow"
+	};
+	
+	return await fetch(url, options)
+		.then(res => res.text())
+		.then(str_data => { return str_data; })
+		.catch(error => { console.error("error: ", error); });
+
+}
+
+// -----------------------------------------------
+
+async function jQuery_csv_GET(url) {
+	
+	var headers = {
+		"Content-Type": "application/json",
+		"Referer": url,
+		"Origin": "https://codesolutions2.github.io",
+		"Connection": "keep-alive",
+		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+		"Access-Control-Allow-Origin": "*",
+	};
+	
+	var settings = {
+		// url: url,
+		type : "GET",
+		async: true,
+		crossDomain: true,
+		beforeSend: function(xhr) {xhr.withCredentials = true;},
+		// headers: new Headers(headers),
+		xhrFields: {responseType: 'text'},
+		dataType: 'text',
+		success: function(response) { console.log('Success'); },
+		error: function(xhr, status, error) { console.error("error: ", error); }
+	};
+	
+	return $.ajax(url, [,settings]).done(function(response) { return response; });
+
+}
+
+// -----------------------------------------------
+
+async function parse_text_to_array(text_str, ys_selected_ColNum, headerORnot) {
+	
+	var row_arr = text_str.split('\n');
+
+	if (headerORnot == "no_header") {
+		row_arr = row_arr.slice(1,row_arr.length-1);
+	}
+	console.log('row_arr: ', row_arr);
+	
+	var xs = [];
+	var ys = [];
+	for (let i=0; i<row_arr.length; i++) {
+		var col_arr = row_arr[i].split(',');
+		console.log('col_arr: ', col_arr);
+		
+		var c = 0
+		var xs_cols = [];
+		var ys_cols = [];
+		for (let j=0; j<col_arr.length; j++) {
+			
+			// Convert strings to number if needed
+			var datatype = Number(col_arr[j]) == Number(col_arr[j]) ? Number(col_arr[j]) : String(col_arr[j]);
+			// console.log('datatype: ', datatype);
+			// console.log('data type [number, string]: ', typeof datatype);
+			
+			if (j == ys_selected_ColNum[c]) {
+				ys_cols.push(datatype);
+				c = c + 1;
+			} else {
+				xs_cols.push(datatype);
+			}
+		}
+		// pack xs and ys
+		xs.push(xs_cols);
+		ys.push(ys_cols);
+	}
+	return [xs, ys];
+}
+
+// -----------------------------------------------
+	
+async function zeros(dims) {
+
+	// dims: [desired_0th_dim, desired_1st_dim, desired_2nd_dim]
+
+	var out = [];
+	
+	if (dims.length == 1) {
+		var desired_0th_dim = dims.at(0);
+		
+		out = Array.from({length: desired_0th_dim}, (val, ind) => { return 0; }); 
+
+	} else if (dims.length == 2) {
+		var desired_0th_dim = dims.at(0);
+		var desired_1st_dim = dims.at(1);
+		
+		for (var i=0; i<desired_0th_dim; i++) {
+			var arr = Array.from({length: desired_1st_dim}, (val, ind) => { return 0; }); 
+			out.push(arr);
+		}
+
+	} else if (dims.length == 3) {
+		var desired_0th_dim = dims.at(0);
+		var desired_1st_dim = dims.at(1);
+		var desired_2nd_dim = dims.at(2);
+		
+		for (var i=0; i<desired_0th_dim; i++) {
+			temp = [];
+			for (var j=0; j<desired_1st_dim; j++) {
+				var arr = Array.from({length: desired_2nd_dim}, (val, ind) => { return 0; }); 
+				temp.push(arr);
+			}
+			out.push(temp);
+		}
+		
+	} else {
+		console.log('Enter an array of length 1, 2, or 3. (ie: [desired_0th_dim, desired_1st_dim, desired_2nd_dim])')
+	}
+	
+	return out;
+}
+	
+// -----------------------------------------------
+	
+async function recur_func(arr) {
+	if (arr != undefined) {
+		return [arr[0], arr.length];
+	} else {
+		return arr;
+	}
+}
+
+async function shape(arr) {
+	var out = await recur_func(arr);
+	var shape_out = [out[1]];
+	var c = 0; // typically work with 4D arrays or less
+	
+	while (out != undefined && c < 4) {
+		out = await recur_func(out[0]);
+		
+		if (out != undefined) {
+			shape_out.push(out[1]);
+		}
+			c = c + 1;
+		}
+
+		if (shape_out.length > 1) {
+			shape_out = shape_out.slice(0, shape_out.length-1);
+		}
+
+	return shape_out;
+}
+
+// -----------------------------------------------
+
+async function isclose(arr0, arr1, rtol) {
+
+	// Determine if two arrays are close to each other, with a summed difference of rtol
+	var sum = 0;
+	for (let i=0; i<K; i++) {
+		for (let j=0; j<c; j++) {
+			var arr_difference = arr0[i][j] - arr1[i][j];
+			sum = sum + arr_difference;
+		}
+	}
+	
+	if (sum < rtol) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+// -----------------------------------------------
+
+async function sum(arr) {
+	return arr.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+}
+
+// -----------------------------------------------
+
+	
+</script>
+</body>
+</html>
